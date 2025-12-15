@@ -2,11 +2,11 @@ import { ClientType } from "../../enums/ClientType"
 import { AddressForm } from "../address/AddressForm"
 
 export interface ClientForm {
-    id: number
+    id?: number
     name: string
     type: ClientType
     address: AddressForm
-    document?: string
+    document?: string,
     stateRegistration?: string
     contactName?: string    
     phoneNumber: string

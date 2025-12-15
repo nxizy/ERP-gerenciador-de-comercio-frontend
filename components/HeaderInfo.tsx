@@ -97,7 +97,7 @@ export default function Header() {
             items={[
               { name: "Clientes", href: "/gerenciar/cliente" },
               { name: "Pedidos", href: "/gerenciar/pedidos" },
-              { name: "Produtos", href: "/gerenciar/produtos" },
+              { name: "Produtos", href: "/gerenciar/produto" },
               {
                 name: "Responsáveis",
                 href: "/gerenciar/responsaveis",

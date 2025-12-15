@@ -69,7 +69,7 @@ export default function SideHeader() {
   }
 
   return (
-    <header className="w-70 h-screen bg-[#2C2F3A] shadow-md flex flex-col align-middle items-center text-center p-4">
+    <header className="w-[18rem] h-dvh bg-[#2C2F3A] shadow-md flex flex-col align-middle items-center text-center p-4">
       <div className="bg-white flex justify-center items-center p-3 rounded-lg mt-10">
         <Image
           src="/icons/logo-info.svg"
@@ -79,7 +79,7 @@ export default function SideHeader() {
           className="p-2"
         />
       </div>
-      <div className="flex flex-col mt-30 w-full relative">
+      <div className="flex flex-col mt-30 mb-10 w-full overflow-y-auto scrollbar-thin relative">
         <button
           onClick={() => (window.location.href = "/")}
           className="text-white font-bold text-2xl mt-10 flex justify-left items-center gap-5 hover:bg-[#3D5AFE] cursor-pointer p-4 rounded-lg"

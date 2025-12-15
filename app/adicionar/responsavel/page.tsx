@@ -9,37 +9,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function AddClientPage() {
+export default function AddResponsiblePage() {
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const states = [
-    "AC",
-    "AL",
-    "AM",
-    "BA",
-    "CE",
-    "DF",
-    "ES",
-    "GO",
-    "MA",
-    "MS",
-    "MT",
-    "MG",
-    "PA",
-    "PB",
-    "PR",
-    "PE",
-    "PI",
-    "RJ",
-    "RS",
-    "RO",
-    "RR",
-    "SC",
-    "SP",
-    "SE",
-    "TO"
-  ];
 
   async function handleSubmit(event: React.FormEvent) {
   event.preventDefault();
@@ -66,7 +38,7 @@ export default function AddClientPage() {
       </div>
       <main className="bg-white ml-100 mt-20 mr-30 mb-30 p-30 w-full rounded-lg">
         <form onSubmit={handleSubmit}>
-          <h1 className="font-bold text-5xl text-center">Cadastro de Cliente</h1>
+          <h1 className="font-bold text-5xl text-center">Cadastro de Responsável</h1>
 
           <h3 className="text-2xl text-center mt-20">Informações Pessoais</h3>
           <div className="grid grid-cols-4 gap-4">
@@ -166,30 +138,6 @@ export default function AddClientPage() {
               colSpan={1}
               placeHolder="ex: São Paulo"
             />
-            <div className="flex flex-col mt-10 col-span-1">
-              <label htmlFor="uf" className="font-bold">
-                UF:
-              </label>
-              <select
-                name="uf"
-                id="uf"
-                required
-                defaultValue=""
-                className="p-3 bg-gray-300 rounded-lg font-bold text-gray-500"
-                onChange={(e) =>
-                  e.target.classList.replace("text-gray-500", "text-gray-900")
-                }
-              >
-                <option value="" disabled>
-                  ex: SP
-                </option>
-                {states.map((state) => (
-                  <option key={state} value={state}>
-                    {state}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
           <div className="flex w-full justify-center">
             <button
