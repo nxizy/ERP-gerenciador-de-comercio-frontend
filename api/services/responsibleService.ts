@@ -1,12 +1,11 @@
-import { ProductForm } from "../types/dto/product/ProductForm";
 import { ResponsibleForm } from "../types/dto/responsible/ResponsibleForm";
 import { handleError } from "../utils/handleError";
 import { api } from "./api";
 
-export const ProductService = {
-    async create(data: ProductForm) {
+export const ResponsibleService = {
+    async create(data: ResponsibleForm) {
         try {
-            const res = await api.post("/api/products", data);
+            const res = await api.post("/api/employees", data);
             return res.data;
         } catch (err: any) {
             handleError(err);
@@ -14,10 +13,34 @@ export const ProductService = {
     },
     async getAll() {
         try {
-            const res = await api.get("/api/products")
-            return res.data
+            const res = await api.get("/api/employees");
+            return res.data;
         } catch (err: any) {
-            handleError(err)
+            handleError(err);
+        }
+    },
+    async getById(id: number) {
+        try {
+            const res = await api.get(`/api/employees/${id}`);
+            return res.data;
+        } catch (err: any) {
+            handleError(err);
+        }
+    },
+    async update(id: number, data: ResponsibleForm) {
+        try {
+            const res = await api.put(`/api/employees/${id}`, data);
+            return res.data;
+        } catch (err: any) {
+            handleError(err);
+        }
+    },
+    async delete(id: number) {
+        try {
+            const res = await api.delete(`/api/employees/${id}`);
+            return res.data;
+        } catch (err: any) {
+            handleError(err);
         }
     },
 };
@@ -28,6 +51,6 @@ export function formDataToResponsibleForm(data: FormData): ResponsibleForm {
         id: data.get("id") as any,
         name: data.get("name") as string,
         document: data.get("document") as string,
-        function: data.get("function") as string
+        function: data.get("function") as string,
     };
 }

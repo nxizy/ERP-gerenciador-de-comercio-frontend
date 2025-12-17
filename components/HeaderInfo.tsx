@@ -10,6 +10,7 @@ import {
   FaPlus,
 } from "react-icons/fa6";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 function DropDownIcon({ label }: { label: string }) {
   if (label === "Adicionar") return <FaPlus size={30} />;
@@ -67,6 +68,8 @@ function DropDown({
 }
 
 export default function Header() {
+  const router = useRouter();
+
   return (
     <header className="my-3 mx-8 bg-white border-b shadow-sm rounded-xl">
       <div className="container mx-auto p-4 flex justify-between items-center">
@@ -111,7 +114,7 @@ export default function Header() {
               { name: "Estoque", href: "/relatorios/estoque" },
             ]}
           />
-          <button className="hover:bg-gray-100 transition rounded-3xl p-2 font-bold">
+          <button className="hover:bg-gray-100 transition rounded-3xl p-2 font-bold" onClick={() => router.push(`/configuracoes`)}>
             <FaGear size={30} />
           </button>
         </nav>

@@ -38,26 +38,60 @@ export default function AddClientPage() {
     "SC",
     "SP",
     "SE",
-    "TO"
+    "TO",
   ];
 
   async function handleSubmit(event: React.FormEvent) {
-  event.preventDefault();
-  setLoading(true);
-  try {
-    const form = new FormData(event.target as HTMLFormElement);
-    const req: ClientForm = formDataToClientForm(form);
-    req.type = mapFrontToBack(form.get("tipoPessoa") as string) || ClientType.PHYSICAL;
-    await ClientService.create(req);
-    toast.success("Cliente cadastrado com sucesso");
-    (event.target as HTMLFormElement).reset();
-  } catch (error: any) {
-    console.error(error);
-    toast.error(error.message || "Erro ao cadastrar cliente");
-  } finally {
-    setLoading(false);
+    event.preventDefault();
+    setLoading(true);
+    try {
+      const form = new FormData(event.target as HTMLFormElement);
+      const req: ClientForm = formDataToClientForm(form);
+      req.type = mapFrontToBack(form.get("tipoPessoa") as string) || ClientType.PHYSICAL;
+      req.document = req.document?.replace(/\D/g, "") || undefined,
+      req.stateRegistration = req.stateRegistration?.replace(/\D/g, "") || undefined,
+      req.phoneNumber = req.phoneNumber?.replace(/\D/g, "") || "",
+      req.phoneNumber2 = req.phoneNumber2?.replace(/\D/g, "") || "",
+      await ClientService.create(req);
+      toast.success("Cliente cadastrado com sucesso");
+      (event.target as HTMLFormElement).reset();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Erro ao cadastrar cliente");
+    } finally {
+      setLoading(false);
+    }
   }
-}
+
+  function formatDocument(value: any) {
+    value = value.replace(/\D/g, "");
+
+    if (value.length <= 11) {
+      return value
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    } else if (value.length == 12) {
+      return value
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2");
+    } else {
+      return value
+        .replace(/(\d{2})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1/$2")
+        .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+    }
+  }
+
+  function formatPhone(phone: string): string {
+    if (phone.length <= 10) {
+      return phone.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+    }
+    return phone.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+  }
 
   return (
     <div className="flex bg-gray-300">
@@ -99,15 +133,17 @@ export default function AddClientPage() {
               </select>
             </div>
             <FormCamp
-              identifier="document"
+              identifier="documento"
               name="Documento: "
               colSpan={2}
+              onChange={(e) => formatDocument(e.target.value)}
               placeHolder="ex: 555.555.555-55 ou 55.555.555/0001-55"
             />
             <FormCamp
               identifier="inscricaoEstadual"
               name="Inscrição Estadual: "
               colSpan={2}
+              onChange={(e) => formatDocument(e.target.value)}
               placeHolder="ex: 555.555.555.555"
             />
           </div>
@@ -124,12 +160,14 @@ export default function AddClientPage() {
               identifier="telefone1"
               name="Telefone: "
               colSpan={1}
+              onChange={(e) => formatPhone(e.target.value)}
               placeHolder="ex: (11) 99999-9999"
             />
             <FormCamp
               identifier="telefone2"
               name="Telefone: "
               colSpan={1}
+              onChange={(e) => formatPhone(e.target.value)}
               placeHolder="ex: (11) 99999-9999"
             />
           </div>
@@ -197,7 +235,9 @@ export default function AddClientPage() {
               type="submit"
               disabled={loading}
             >
-              <h3 className="text-3xl font-bold text-white ">{loading? "Enviando..." : "Cadastrar"}</h3>
+              <h3 className="text-3xl font-bold text-white ">
+                {loading ? "Enviando..." : "Cadastrar"}
+              </h3>
             </button>
           </div>
         </form>

@@ -79,7 +79,7 @@ export default function SideHeader() {
           className="p-2"
         />
       </div>
-      <div className="flex flex-col mt-30 mb-10 w-full overflow-y-auto scrollbar-thin relative">
+      <div className="flex flex-col mt-15 mb-10 w-full h-full overflow-y-auto scrollbar-thin relative">
         <button
           onClick={() => (window.location.href = "/")}
           className="text-white font-bold text-2xl mt-10 flex justify-left items-center gap-5 hover:bg-[#3D5AFE] cursor-pointer p-4 rounded-lg"
