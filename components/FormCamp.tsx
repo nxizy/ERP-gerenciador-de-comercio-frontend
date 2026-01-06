@@ -1,8 +1,9 @@
 interface FormCampProps {
   identifier: string;
   name: string;
-  colSpan: number;
+  colSpan?: number;
   rowSpan?: number;
+  type?: string
   placeHolder?: string;
   required?: boolean;
   value?: string;
@@ -40,6 +41,7 @@ export default function FormCamp({
   name,
   colSpan,
   rowSpan,
+  type,
   placeHolder,
   required = false,
   value,
@@ -47,7 +49,7 @@ export default function FormCamp({
   onKeyDown,
   children,
 }: FormCampProps) {
-  const colClass = COL_MAP[colSpan] ?? "col-span-1";
+  const colClass = colSpan ? COL_MAP[colSpan] ?? "col-span-1" : "";
   const rowClass = rowSpan ? (ROW_MAP[rowSpan] ?? "") : "";
 
   return (
@@ -56,7 +58,7 @@ export default function FormCamp({
         {name}
       </label>
       <input
-        type="text"
+        type={type ? type : "text"}
         placeholder={placeHolder}
         className="p-3 bg-gray-300 rounded-lg font-bold"
         id={`${identifier}`}

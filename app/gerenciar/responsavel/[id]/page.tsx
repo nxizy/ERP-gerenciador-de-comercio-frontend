@@ -22,7 +22,7 @@ export default function ManageResponsiblePage() {
       const data = await ResponsibleService.getById(Number(id));
       setResponsible(data);
     } catch (err: any) {
-      toast.error;
+      toast.error(err)
     }
   }
 

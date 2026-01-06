@@ -1,3 +1,4 @@
+
 "use client";
 
 import SideHeader from "@/components/SideHeader";
@@ -7,10 +8,10 @@ import { useEffect, useState, useRef } from "react";
 import { PiSealCheck } from "react-icons/pi";
 import UserConfirmation from "@/components/UserConfirmation";
 import SaveButton from "@/components/SaveButton";
+import { ClientService } from "@/api/services/clientService";
+import { ClientForm } from "@/api/types/dto/client/ClientForm";
+import { mapBackToFront } from "@/api/types/dto/client/ClientFormUtils";
 
-/* ============================
-       Interfaces
-============================= */
 interface ProductProps {
   id: number;
   name: string;
@@ -82,7 +83,6 @@ export default function AddPedidoPage() {
   useEffect(() => {
     if (debouncedClient.length < 2) return;
 
-    // 🔥 Simulação backend
     setClientSuggestions([
       {
         id: 1,
@@ -97,6 +97,7 @@ export default function AddPedidoPage() {
     ]);
     setShowClientSuggestions(true);
   }, [debouncedClient]);
+
 
   const handleSelectClient = (client: any) => {
     setFormData((prev) => ({
@@ -136,11 +137,10 @@ export default function AddPedidoPage() {
   }
 
   function handlePrint() {
-    if(!savedOrder) return alert("Salve a ordem antes de imprimir")
+    if (!savedOrder) return alert("Salve a ordem antes de imprimir");
 
     // printOrder(savedOrder)
   }
-
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -438,15 +438,22 @@ export default function AddPedidoPage() {
                   >
                     <PiSealCheck size={30} />
                   </SaveButton>
-
                 </div>
               </div>
             )}
 
-            {tab === 2 && <h1>Formulário da solicitação aqui depois 🔥</h1>}
+            {tab === 2 && (
+              <div className="w-full">
+                <h1 className="mt-5 font-bold text-center text-5xl">
+                  Cadastro de Pedido
+                </h1>
+                <h3 className="text-2xl text-center mt-20">Solicitação</h3>
+              </div>
+            )}
           </div>
         </div>
       </main>
     </div>
   );
 }
+

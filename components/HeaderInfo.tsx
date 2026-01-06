@@ -103,7 +103,7 @@ export default function Header() {
               { name: "Produtos", href: "/gerenciar/produto" },
               {
                 name: "Responsáveis",
-                href: "/gerenciar/responsaveis",
+                href: "/gerenciar/responsavel",
               },
             ]}
           />
