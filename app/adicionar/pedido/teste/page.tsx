@@ -1,4 +1,3 @@
-
 "use client";
 
 import SideHeader from "@/components/SideHeader";
@@ -11,6 +10,11 @@ import SaveButton from "@/components/SaveButton";
 import { ClientService } from "@/api/services/clientService";
 import { ClientForm } from "@/api/types/dto/client/ClientForm";
 import { mapBackToFront } from "@/api/types/dto/client/ClientFormUtils";
+import { toast } from "sonner";
+import formatPhone from "@/utils/formatter";
+import { ProductService } from "@/api/services/productService";
+import { ProductForm } from "@/api/types/dto/product/ProductForm";
+import { FaPrint } from "react-icons/fa6";
 
 interface ProductProps {
   id: number;
@@ -50,6 +54,10 @@ function useDebounce(value: string, delay = 500) {
   return debounced;
 }
 
+function getTodayDate() {
+  return new Date().toISOString().split("T")[0];
+}
+
 export default function AddPedidoPage() {
   const [tab, setTab] = useState(1);
 
@@ -64,7 +72,7 @@ export default function AddPedidoPage() {
     products: [],
     totalOrderValue: 0,
     orderSolicitation: "",
-    entryDate: "",
+    entryDate: getTodayDate(),
     status: "Aberto",
     serviceDescription: "",
     finishDate: "",
@@ -74,41 +82,60 @@ export default function AddPedidoPage() {
 
   const [savedOrder, setSavedOrder] = useState(null);
 
-  const [clientName, setClientName] = useState("");
+  // ----- Clientes -----
+
+  const [clientName, setClientName] = useState<string>("");
   const debouncedClient = useDebounce(clientName);
   const [clientSuggestions, setClientSuggestions] = useState<any[]>([]);
+  const [clients, setClients] = useState<ClientForm[]>([]);
   const [showClientSuggestions, setShowClientSuggestions] = useState(false);
   const clientRef = useRef<HTMLObjectElement>(null);
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  async function fetchClients() {
+    try {
+      const res = await ClientService.getAll();
+      const mappedClients = res.content.map((client: ClientForm) => ({
+        ...client,
+        type: mapBackToFront(client.type),
+      }));
+      setClients(mappedClients);
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao buscar clientes");
+    }
+  }
 
   useEffect(() => {
-    if (debouncedClient.length < 2) return;
+    if (!debouncedClient || debouncedClient.length < 2) return;
 
-    setClientSuggestions([
-      {
-        id: 1,
-        name: "Neymar",
-        cep: "00000-000",
-        address: "Rua teste",
-        contactName: "Pedrinho",
-        contactPhone1: "(19) 99999-9999",
-        contactPhone2: "(19) 98888-8888",
-      },
-      { id: 2, name: "Nelson", cep: "11111-111", address: "Av xp" },
-    ]);
+    const filtered = clients.filter((c) =>
+      c.name.toLowerCase().includes(debouncedClient.toLowerCase()),
+    );
+    setClientSuggestions(filtered);
     setShowClientSuggestions(true);
   }, [debouncedClient]);
 
-
   const handleSelectClient = (client: any) => {
+    const hasAddress =
+      client.address && client.address.address && client.address.district;
+
+    const formattedAddress = hasAddress
+      ? `${client.address.address}, ${client.address.district}${client.address.city ? " - " + client.address.city : ""}`
+      : "";
+
     setFormData((prev) => ({
       ...prev,
       name: client.name,
-      address: client.address,
-      cep: client.cep,
+      address: formattedAddress,
+      cep: client.address.cep,
       contactName: client.contactName,
-      contactPhone1: client.contactPhone1,
-      contactPhone2: client.contactPhone2,
+      contactPhone1: client.phoneNumber ? formatPhone(client.phoneNumber) : "",
+      contactPhone2: client.phoneNumber2 ? formatPhone(client.phoneNumber2) : "",
     }));
+
+    console.log(client);
     setClientName(client.name);
     setShowClientSuggestions(false);
   };
@@ -131,17 +158,6 @@ export default function AddPedidoPage() {
     }
   };
 
-  async function handleSaveForm() {
-    // const response = await api.post("/orders", formData)
-    // setSavedOrder(response.data)
-  }
-
-  function handlePrint() {
-    if (!savedOrder) return alert("Salve a ordem antes de imprimir");
-
-    // printOrder(savedOrder)
-  }
-
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (clientRef.current && !clientRef.current.contains(e.target as Node)) {
@@ -158,19 +174,31 @@ export default function AddPedidoPage() {
   const [prodValue, setProdValue] = useState<number | "">("");
   const debouncedProd = useDebounce(prodName);
   const [productSuggestions, setProductSuggestions] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductForm[]>([]);
   const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   const productRef = useRef<HTMLDivElement>(null);
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
 
   useEffect(() => {
-    if (debouncedProd.length < 2) return;
+    fetchProducts();
+  }, []);
 
-    // 🔥 Simulação backend
-    setProductSuggestions([
-      { id: 10, name: "Notebook Dell" },
-      { id: 11, name: "Fonte 19v" },
-    ]);
+  async function fetchProducts() {
+    try {
+      const res = await ProductService.getAll();
+      setProducts(res.content);
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao buscar produtos");
+    }
+  }
+
+  useEffect(() => {
+    if (debouncedProd.length < 2) return;
+    const filtered = products.filter((p) =>
+      p.name.toLowerCase().includes(debouncedProd.toLowerCase()),
+    );
+    setProductSuggestions(filtered);
     setShowProductSuggestions(true);
   }, [debouncedProd]);
 
@@ -221,6 +249,23 @@ export default function AddPedidoPage() {
 
     setOpenConfirmation(false);
     setSelectedProduct(null);
+  }
+
+  async function handleSaveForm() {
+    // const response = await api.post("/orders", formData)
+    // setSavedOrder(response.data)
+    console.log(formData);
+  }
+
+  function handlePrintClosed() {
+    if (!savedOrder) return alert("Salve a ordem antes de imprimir");
+
+    // printFinishedOrder(savedOrder)
+  }
+
+  function handlePrintEntry() {
+
+    //printEntryOrder()
   }
 
   return (
@@ -309,8 +354,8 @@ export default function AddPedidoPage() {
                     data={formData.contactName}
                   />
                   <DataFormCamp
-                    identifier="telefone2"
-                    name="Telefone 1: "
+                    identifier="telefone1"
+                    name="Telefone: "
                     colSpan={1}
                     placeholder={"----------"}
                     data={formData.contactPhone1}
@@ -431,11 +476,7 @@ export default function AddPedidoPage() {
                     colSpan={4}
                     data={`R$ ${formData.totalOrderValue.toFixed(2)}`}
                   />
-                  <SaveButton
-                    onClick={() => console.log(formData)}
-                    colSpan={1}
-                    label="Salvar"
-                  >
+                  <SaveButton onClick={handleSaveForm} colSpan={1} label="Salvar">
                     <PiSealCheck size={30} />
                   </SaveButton>
                 </div>
@@ -448,6 +489,129 @@ export default function AddPedidoPage() {
                   Cadastro de Pedido
                 </h1>
                 <h3 className="text-2xl text-center mt-20">Solicitação</h3>
+
+                <div className="grid grid-cols-4 gap-4 relative">
+                  <div className={`flex flex-col mt-10 col-span-3 row-span-2`}>
+                    <label htmlFor="solicitation" className="font-bold">
+                      Solicitação:
+                    </label>
+                    <textarea
+                      id="solicitation"
+                      name="solicitation"
+                      placeholder="Solicitação do Cliente"
+                      className="p-3 bg-gray-300 rounded-lg font-bold resize-none h-full"
+                      required
+                      value={formData.orderSolicitation}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          orderSolicitation: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <FormCamp
+                    identifier="dataEntrada"
+                    colSpan={1}
+                    name="Data de Entrada: "
+                    type="date"
+                    value={formData.entryDate}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        entryDate: e.target.value,
+                      }))
+                    }
+                  />
+                  <div className="flex flex-col mt-10 col-span-1">
+                    <label htmlFor="status" className="font-bold">
+                      Status:
+                    </label>
+                    <select
+                      name=""
+                      id="status"
+                      required
+                      defaultValue=""
+                      className="p-3 bg-gray-300 rounded-lg font-bold text-gray-500"
+                      onChange={(e) =>
+                        e.target.classList.replace("text-gray-500", "text-gray-900")
+                      }
+                    >
+                      <option value="" disabled>
+                        ex: Em Andamento
+                      </option>
+                      <option value="Em Aberto">Em Aberto</option>
+                      <option value="Em Andamento">Em Andamento</option>
+                      <option value="Concluído">Concluído</option>
+                      <option value="Cancelado">Cancelado</option>
+                    </select>
+                  </div>
+                  <div className={`flex flex-col mt-10 col-span-3 row-span-2`}>
+                    <label htmlFor="description" className="font-bold">
+                      Solicitação:
+                    </label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      placeholder="Descrição do Serviço"
+                      className="p-3 bg-gray-300 rounded-lg font-bold resize-none h-full"
+                      required
+                      value={formData.serviceDescription}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          serviceDescription: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <FormCamp
+                    identifier="dataFinalizacao"
+                    colSpan={1}
+                    name="Data de Finalização: "
+                    type="date"
+                    value={formData.finishDate}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        finishDate: e.target.value,
+                      }))
+                    }
+                  />
+                  <FormCamp
+                    identifier="dataRetirada"
+                    colSpan={1}
+                    name="Data de Retirada: "
+                    type="date"
+                    value={formData.pickupDate}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        pickupDate: e.target.value,
+                      }))
+                    }
+                  />
+                  <FormCamp
+                    identifier="responsavel"
+                    name="Responsável: "
+                    colSpan={3}
+                    rowSpan={2}
+                    placeHolder="Técnico Responsável"
+                    value={formData.responsible}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        responsible: e.target.value,
+                      }))
+                    }
+                  />
+                  <SaveButton onClick={handlePrintEntry} colSpan={1} label="Imprimir Entrada">
+                    <FaPrint size={25}/>
+                  </SaveButton>
+                  <SaveButton onClick={handlePrintClosed} colSpan={1} label="Imprimir Fechamento">
+                    <PiSealCheck size={25} />
+                  </SaveButton>
+                </div>
               </div>
             )}
           </div>
@@ -456,4 +620,3 @@ export default function AddPedidoPage() {
     </div>
   );
 }
-

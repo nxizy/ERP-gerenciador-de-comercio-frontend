@@ -81,8 +81,7 @@ export default function AddProductPage() {
               <label htmlFor={"description"} className="font-bold">
                 Descrição:
               </label>
-              <input
-                type="text"
+              <textarea
                 placeholder="ex: Memória RAM Kingston Fury Beast, 16GB, 3200MHz, DDR4, CL16, Preto - KF432C16BB1/16"
                 className="p-3 bg-gray-300 rounded-lg font-bold h-full"
                 id={"description"}
